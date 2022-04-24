@@ -38,11 +38,11 @@
       <div class="tool-container">
         <div class="title">工具栏</div>
         <div class="tool-content">
-          <div class="tool" @click="backoutFuc">
+          <div class="tool" :class="canundo ? 'toolDefault' : 'toolDisabeld'" @click="backoutFuc">
             <img src="../assets/backout.svg" alt="">
             <p>撤销</p>
           </div>
-          <div class="tool" @click="recoverFuc">
+          <div class="tool" :class="canredo ? 'toolDefault' : 'toolDisabeld'" @click="recoverFuc">
             <img src="../assets/recover.svg" alt="">
             <p>恢复</p>
           </div>
@@ -72,8 +72,7 @@
       <div id="canvas" ref="canvas" class="canvas-container"></div>
     </div>
     <div class="right-container">
-      <div :class="title ? 'toolDisabeld' : 'toolDefault'">属性区
-        <button @click="changeColor()">切换</button>
+      <div>属性区
       </div>
     </div>
   </div>
@@ -92,14 +91,11 @@ export default {
   name: 'FlowChart',
   data(){
     return{
-      data:{
-        graph: null, // 画布实例
-        dnd: null, // 拖拽实例
-        ports: [], // 连接桩定义
-        // canundo: false, // 是否可撤销
-        // canredo: false, // 是否可恢复
-        title:false,
-      }
+      graph: null, // 画布实例
+      dnd: null, // 拖拽实例
+      ports: [], // 连接桩定义
+      canundo: false, // 是否可撤销
+      canredo: false, // 是否可恢复
     }
   },
   computed:{
@@ -143,7 +139,6 @@ export default {
       // 显示是否可撤销与恢复
       const history = this.graph.history
       history.on('change', () => {
-        console.log('history', this.graph.history)
         this.canundo = history.undoStack ? true : false
         this.canredo = history.redoStack ? true : false
       })
@@ -243,10 +238,6 @@ export default {
         target: this.graph,
       }
       this.dnd = new Addon.Dnd(options)
-    },
-    changeColor(){
-      this.title = !this.title
-      console.log('this.title', this.title)
     },
     // 工具栏事件
     backoutFuc(){
@@ -402,6 +393,12 @@ export default {
               text-align: center;
             }
           }
+          .toolDisabeld{
+            color: gray;
+          }
+          .toolDefault{
+            color: #000;
+          }
         }
       }
       .canvas-title{
@@ -419,12 +416,6 @@ export default {
       height: 500px;
       background-color: cadetblue;
     }
-  }
-  .toolDisabeld{
-    color: red;
-  }
-  .toolDefault{
-    color: blue;
   }
 }
 </style>
