@@ -72,8 +72,8 @@
       <div id="canvas" ref="canvas" class="canvas-container"></div>
     </div>
     <div class="right-container">
-      <div :class="canundo ? 'toolDefault' : 'toolDisabeld'">属性区
-        <button @click="change(canundo)">切换</button>
+      <div :class="{'toolDefault': true,'toolDisabeld':title}">属性区
+        <button @click="change()">切换</button>
       </div>
     </div>
   </div>
@@ -244,9 +244,9 @@ export default {
       }
       this.dnd = new Addon.Dnd(options)
     },
-    change(canundo){
-      this.canundo = !canundo
-      console.log('this.canundo', canundo)
+    change(){
+      this.title = !this.title
+      console.log('this.title', this.title)
     },
     // 工具栏事件
     backoutFuc(){
@@ -334,7 +334,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @mixin flexRowCen{
   display: flex;
   flex-direction: row;
