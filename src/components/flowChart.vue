@@ -72,8 +72,8 @@
       <div id="canvas" ref="canvas" class="canvas-container"></div>
     </div>
     <div class="right-container">
-      <div :class="{'toolDefault': true,'toolDisabeld':title}">属性区
-        <button @click="change()">切换</button>
+      <div :class="title ? 'toolDisabeld' : 'toolDefault'">属性区
+        <button @click="changeColor()">切换</button>
       </div>
     </div>
   </div>
@@ -244,7 +244,7 @@ export default {
       }
       this.dnd = new Addon.Dnd(options)
     },
-    change(){
+    changeColor(){
       this.title = !this.title
       console.log('this.title', this.title)
     },
@@ -334,7 +334,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @mixin flexRowCen{
   display: flex;
   flex-direction: row;
@@ -421,10 +421,10 @@ export default {
     }
   }
   .toolDisabeld{
-    color: gray;
+    color: red;
   }
   .toolDefault{
-    color: #000;
+    color: blue;
   }
 }
 </style>

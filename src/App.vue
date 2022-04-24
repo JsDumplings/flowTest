@@ -1,14 +1,17 @@
 <template>
-  <FlowChart />
+  <!-- <FlowChart /> -->
+  <TestDemo />
 </template>
 
 <script>
-import FlowChart from './components/flowChart.vue'
+// import FlowChart from './components/flowChart.vue'
+import TestDemo from './components/testDemo.vue'
 
 export default {
   name: 'App',
   components: {
-    FlowChart
+    // FlowChart,
+    TestDemo
   }
 }
 </script>
