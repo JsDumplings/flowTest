@@ -1,24 +1,5 @@
-# my-test
-
-## Project setup
-```
-yarn install
-```
-
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
-
-### Compiles and minifies for production
-```
-yarn build
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### 问题
+1. 对于删除，是否可以进行，一层一层的删除？如果可以，会出现什么额外问题？
+2. 对于连线，是否要给连线加上连接桩？（如果在连线上有额外操作，肯定要加入）
+3. 对于控件覆盖？ 是否会出现需要去 选中 下层控件节点显示数据需要？
+4. 对于编辑文本样式问题？

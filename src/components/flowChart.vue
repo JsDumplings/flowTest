@@ -37,6 +37,7 @@
     <div class="center-container">
       <div class="tool-container">
         <div class="title">工具栏</div>
+        <!-- 正式可以写入svg标签 -->
         <div class="tool-content">
           <div class="tool" :class="canundo ? 'toolDefault' : 'toolDisabeld'" @click="backoutFuc">
             <img src="../assets/backout.svg" alt="">
@@ -98,13 +99,6 @@ export default {
       canredo: false, // 是否可恢复
     }
   },
-  computed:{
-    // toolDisabeld(){
-    //   return {
-    //     'color':this.canundo ? '#000' : 'gray'
-    //   }
-    // }
-  },
   methods:{
     initGraph(){
 
@@ -139,8 +133,8 @@ export default {
       // 显示是否可撤销与恢复
       const history = this.graph.history
       history.on('change', () => {
-        this.canundo = history.undoStack ? true : false
-        this.canredo = history.redoStack ? true : false
+        this.canundo = history.undoStack.length > 0 ? true : false
+        this.canredo = history.redoStack.length > 0 ? true : false
       })
 
       // 初始化画布数据
@@ -220,18 +214,56 @@ export default {
           ports[i].style.visibility = show ? 'visible' : 'hidden'
         }
       }
-      this.graph.on('node:mouseenter', () => {
-        const ports = dom.querySelectorAll(
-          '.x6-port-body',
-        )
+      // // 鼠标移上去
+      // this.graph.on('node:mouseenter', () => {
+      //   const ports = dom.querySelectorAll(
+      //     '.x6-port-body',
+      //   )
+      //   showPorts(ports, true)
+      // })
+      // 鼠标单击
+      this.graph.on('node:click', () => {
+        const ports = dom.querySelectorAll('.x6-port-body')
         showPorts(ports, true)
       })
-      this.graph.on('node:mouseleave', () => {
-        const ports = dom.querySelectorAll(
-          '.x6-port-body',
-        )
+      // 鼠标单击空白
+      this.graph.on('blank:click', () => {
+        const ports = dom.querySelectorAll('.x6-port-body')
         showPorts(ports, false)
       })
+      // 鼠标双击显示信息
+      this.graph.on('node:dblclick', (e, x, y, cell, view) => {
+        console.log('e', e)
+        console.log('x', x)
+        console.log('y', y)
+        console.log('cell', cell)
+        console.log('view', view)
+      })
+      // 鼠标双击cell
+      this.graph.on('cell:dblclick',({cell,e})=>{
+        console.log('e', e)
+        console.log('cell', cell)
+        // 注释写入编辑节点
+        const isNode = cell.isNode()
+        const name = cell.isNode() ? 'node-editor' : 'edge-editor'
+        cell.removeTool(name)
+        cell.addTools({
+          name,
+          args: {
+            event: e,
+            attrs: {
+              backgroundColor: isNode ? '#EFF4FF' : '#FFF',
+            },
+          },
+        })
+      })
+      // // 鼠标移走
+      // this.graph.on('node:mouseleave', () => {
+      //   const ports = dom.querySelectorAll(
+      //     '.x6-port-body',
+      //   )
+      //   showPorts(ports, false)
+      // })
 
       // 拖拽配置
       const options = {
@@ -242,12 +274,15 @@ export default {
     // 工具栏事件
     backoutFuc(){
       // 撤销
-      this.graph.history.undo()
-      
+      const history = this.graph.history
+      history.undo()
+      this.canundo = history.undoStack.length ? true : false
     },
     recoverFuc(){
       // 恢复
-      this.graph.history.redo()
+      const history = this.graph.history
+      history.redo()
+      this.canredo = history.redoStack.length ? true : false
     },
     deleteFuc(){
       // 删除
@@ -315,6 +350,10 @@ export default {
           node = this.drawGraph(annotationSvg)
           break
       }
+      /**
+       * 在初始拖拽时，需求
+       * 一、控件node中加入数据initData(id包含在内,id自增，暂时可以先给参数保存)
+       */
       console.log(type,'node',node)
       this.dnd.start(node,e)
     }
@@ -395,9 +434,11 @@ export default {
           }
           .toolDisabeld{
             color: gray;
+            cursor: default;
           }
           .toolDefault{
             color: #000;
+            cursor: pointer;
           }
         }
       }
