@@ -38,7 +38,7 @@
       <div class="tool-container">
         <div class="title">工具栏</div>
         <div class="tool-content">
-          <div class="tool" :class="canundo ? 'toolDefault' : 'toolDisabeld'" @click="backoutFuc">
+          <div class="tool" @click="backoutFuc">
             <img src="../assets/backout.svg" alt="">
             <p>撤销</p>
           </div>
@@ -46,7 +46,7 @@
             <img src="../assets/recover.svg" alt="">
             <p>恢复</p>
           </div>
-          <div class="tool">
+          <div class="tool" @click="deleteFuc">
             <img src="../assets/delete.svg" alt="">
             <p>删除</p>
           </div>
@@ -96,8 +96,8 @@ export default {
         graph: null, // 画布实例
         dnd: null, // 拖拽实例
         ports: [], // 连接桩定义
-        canundo: false, // 是否可撤销
-        canredo: false, // 是否可恢复
+        // canundo: false, // 是否可撤销
+        // canredo: false, // 是否可恢复
         title:false,
       }
     }
@@ -257,6 +257,13 @@ export default {
     recoverFuc(){
       // 恢复
       this.graph.history.redo()
+    },
+    deleteFuc(){
+      // 删除
+      const cells = this.graph.getSelectedCells()
+      if (cells.length) {
+        this.graph.removeCells(cells)
+      }
     },
     // 从左侧拖拽的图片绘制到画布区
     drawGraph(img){
