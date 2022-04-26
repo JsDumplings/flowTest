@@ -51,10 +51,10 @@
             <img src="../assets/delete.svg" alt="">
             <p>删除</p>
           </div>
-          <div class="tool">
+          <!-- <div class="tool">
             <img src="../assets/ligature.svg" alt="">
             <p>连线</p>
-          </div>
+          </div> -->
           <div class="tool">
             <img src="../assets/verify.svg" alt="">
             <p>校验</p>
@@ -73,8 +73,8 @@
       <div id="canvas" ref="canvas" class="canvas-container"></div>
     </div>
     <div class="right-container">
-      <div>属性区
-      </div>
+      <div>属性区</div>
+      <div>{{nodeData}}</div>
     </div>
   </div>
 </div>
@@ -87,7 +87,7 @@ import groupSvg from '../assets/group.svg'
 import sortSvg from '../assets/sort.svg'
 import conditionSvg from '../assets/condition.svg'
 import outputSvg from '../assets/output.svg'
-import annotationSvg from '../assets/annotation.svg'
+// import annotationSvg from '../assets/annotation.svg'
 export default {
   name: 'FlowChart',
   data(){
@@ -97,6 +97,8 @@ export default {
       ports: [], // 连接桩定义
       canundo: false, // 是否可撤销
       canredo: false, // 是否可恢复
+      nodeData:"", // 节点数据
+      idsArr: [[],[],[],[],[],[],[]] // 控件数量
     }
   },
   methods:{
@@ -119,14 +121,6 @@ export default {
         grid:{
           size: 10,
           visible: false
-        }
-      })
-
-      // 画布上的 删除区域方法delete
-      this.graph.bindKey('backspace', () => {
-        const cells = this.graph.getSelectedCells()
-        if (cells.length) {
-          this.graph.removeCells(cells)
         }
       })
 
@@ -207,63 +201,23 @@ export default {
           },
         ],
       }
-
-      // 控制连接桩显示/隐藏
-      const showPorts = (ports, show) => {
-        for (let i = 0, len = ports.length; i < len; i = i + 1) {
-          ports[i].style.visibility = show ? 'visible' : 'hidden'
-        }
-      }
-      // // 鼠标移上去
-      // this.graph.on('node:mouseenter', () => {
-      //   const ports = dom.querySelectorAll(
-      //     '.x6-port-body',
-      //   )
-      //   showPorts(ports, true)
-      // })
-      // 鼠标单击
-      this.graph.on('node:click', () => {
-        const ports = dom.querySelectorAll('.x6-port-body')
-        showPorts(ports, true)
-      })
       // 鼠标单击空白
       this.graph.on('blank:click', () => {
-        const ports = dom.querySelectorAll('.x6-port-body')
-        showPorts(ports, false)
       })
       // 鼠标双击显示信息
-      this.graph.on('node:dblclick', (e, x, y, cell, view) => {
-        console.log('e', e)
-        console.log('x', x)
-        console.log('y', y)
-        console.log('cell', cell)
-        console.log('view', view)
+      this.graph.on('cell:dblclick', ({ cell }) => {
+        this.nodeData = cell.getData()
       })
-      // 鼠标双击cell
-      this.graph.on('cell:dblclick',({cell,e})=>{
-        console.log('e', e)
+      this.graph.on('cell:removed', ({ cell, index, options }) => {
         console.log('cell', cell)
-        // 注释写入编辑节点
-        const isNode = cell.isNode()
-        const name = cell.isNode() ? 'node-editor' : 'edge-editor'
-        cell.removeTool(name)
-        cell.addTools({
-          name,
-          args: {
-            event: e,
-            attrs: {
-              backgroundColor: isNode ? '#EFF4FF' : '#FFF',
-            },
-          },
-        })
+        console.log('index', index)
+        console.log('options', options)
+        // e.stopPropagation()
+        let data = cell.getData()
+        console.log('data', data)
+        this.idsArr[data.controlIdx] = this.idsArr[data.controlIdx] - 1
+        console.log('控件值', this.idsArr)
       })
-      // // 鼠标移走
-      // this.graph.on('node:mouseleave', () => {
-      //   const ports = dom.querySelectorAll(
-      //     '.x6-port-body',
-      //   )
-      //   showPorts(ports, false)
-      // })
 
       // 拖拽配置
       const options = {
@@ -292,7 +246,7 @@ export default {
       }
     },
     // 从左侧拖拽的图片绘制到画布区
-    drawGraph(img){
+    drawGraph(img,data){
       return this.graph.createNode({
         width: 40,
         height: 40,
@@ -308,6 +262,7 @@ export default {
             'xlink:href': img,
           },
         },
+        data: data,
         ports: {...this.ports}
       })
     },
@@ -316,9 +271,14 @@ export default {
       const target = e.currentTarget
       // 通过类型data-type 去判断拖拽的是什么图形
       const type = target.getAttribute('data-type')
+      let data = {}
       let node = null
       switch(type){
-        case 'circle':
+        case 'circle': {
+          data = {
+            name: '起点',
+            controlIdx: 0
+          }
           node = this.graph.createNode({
             shape: 'circle',
             width: 30,
@@ -328,34 +288,74 @@ export default {
                 fill: '#000'
               }
             },
+            data,
+            ports: {...this.ports}
+          })
+          break;
+        }
+        case 'filter':
+          data = {
+            name: '过滤',
+            controlIdx: 1
+          }
+          node = this.drawGraph(filterSvg,data)
+          break
+        case 'group':
+          data = {
+            name: '分组',
+            controlIdx: 2
+          }
+          node = this.drawGraph(groupSvg,data)
+          break
+        case 'sort':
+          data = {
+            name: '排序',
+            controlIdx: 3
+          }
+          node = this.drawGraph(sortSvg,data)
+          break
+        case 'condition':
+          data = {
+            name: '条件',
+            controlIdx: 4
+          }
+          node = this.drawGraph(conditionSvg,data)
+          break
+        case 'output':
+          data = {
+            name: '输出',
+            controlIdx: 5
+          }
+          node = this.drawGraph(outputSvg,data)
+          break
+        case 'annotation': {
+          data = {
+            name: '注释',
+            controlIdx: 6
+          }
+          node = this.graph.createNode({
+            shape: 'rect',
+            width: 100,
+            height: 40,
+            attrs: {
+              body: {
+                // fill: '#000'
+              }
+            },
+            data,
             ports: {...this.ports}
           })
           break
-        case 'filter':
-          node = this.drawGraph(filterSvg)
-          break
-        case 'group':
-          node = this.drawGraph(groupSvg)
-          break
-        case 'sort':
-          node = this.drawGraph(sortSvg)
-          break
-        case 'condition':
-          node = this.drawGraph(conditionSvg)
-          break
-        case 'output':
-          node = this.drawGraph(outputSvg)
-          break
-        case 'annotation':
-          node = this.drawGraph(annotationSvg)
-          break
+        }
       }
       /**
        * 在初始拖拽时，需求
-       * 一、控件node中加入数据initData(id包含在内,id自增，暂时可以先给参数保存)
+       * 一、控件node中加入数据initData(id包含在内,id自增，暂时可以先给参数保存)  会产生不能区分是第几层，所以需要用二维数组去保存(删除时，可以具体定位到哪一个)
        */
-      console.log(type,'node',node)
+      console.log(type,'node',node,e)
       this.dnd.start(node,e)
+      this.idsArr[data['controlIdx']].push(1)
+      console.log('初始控件值', this.idsArr)
     }
   },
   mounted(){
@@ -458,5 +458,17 @@ export default {
       background-color: cadetblue;
     }
   }
+}
+</style>
+<style>
+/* .x6-cell-tool-editor{
+  min-width: 100px !important;
+  min-height: 40px !important;
+} */
+.x6-port-body {
+  visibility: hidden;
+}
+.x6-node-selected .x6-port-body {
+  visibility: visible;
 }
 </style>
