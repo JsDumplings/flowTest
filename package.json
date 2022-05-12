@@ -10,7 +10,8 @@
   "dependencies": {
     "@antv/x6": "^1.31.3",
     "core-js": "^3.8.3",
-    "vue": "^3.2.13"
+    "vue": "^3.2.13",
+    "vue-router": "^4.0.15"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

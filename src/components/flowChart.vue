@@ -75,6 +75,7 @@
     <div class="right-container">
       <div>属性区</div>
       <div>{{nodeData}}</div>
+      <button @click="submit">提交</button>
     </div>
   </div>
 </div>
@@ -205,8 +206,20 @@ export default {
       this.graph.on('blank:click', () => {
       })
       // 鼠标双击显示信息
-      this.graph.on('cell:dblclick', ({ cell }) => {
+      this.graph.on('cell:dblclick', ({ cell, e }) => {
         this.nodeData = cell.getData()
+        const isNode = cell.isNode()
+        const name = isNode ? 'node-editor' : 'edge-editor'
+        cell.removeTool(name)
+        cell.addTools({
+          name,
+          args: {
+            event: e,
+            attrs: {
+              backgroundColor: isNode ? '#EFF4FF' : '#FFF',
+            },
+          },
+        })
       })
       this.graph.on('cell:removed', ({ cell, index, options }) => {
         console.log('cell', cell)
@@ -215,8 +228,6 @@ export default {
         // e.stopPropagation()
         let data = cell.getData()
         console.log('data', data)
-        this.idsArr[data.controlIdx] = this.idsArr[data.controlIdx] - 1
-        console.log('控件值', this.idsArr)
       })
 
       // 拖拽配置
@@ -348,14 +359,12 @@ export default {
           break
         }
       }
-      /**
-       * 在初始拖拽时，需求
-       * 一、控件node中加入数据initData(id包含在内,id自增，暂时可以先给参数保存)  会产生不能区分是第几层，所以需要用二维数组去保存(删除时，可以具体定位到哪一个)
-       */
       console.log(type,'node',node,e)
       this.dnd.start(node,e)
-      this.idsArr[data['controlIdx']].push(1)
-      console.log('初始控件值', this.idsArr)
+    },
+    //提交
+    submit(){
+      console.log('this.graph', this.graph.toJSON())
     }
   },
   mounted(){
@@ -447,9 +456,6 @@ export default {
         top: 90px;
         left: 20px;
         z-index: 2;
-      }
-      .canvas-container{
-        
       }
     }
     .right-container{

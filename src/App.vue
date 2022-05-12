@@ -1,14 +1,14 @@
 <template>
+  <!-- <router-view></router-view> -->
   <FlowChart />
 </template>
 
 <script>
 import FlowChart from './components/flowChart.vue'
-
 export default {
   name: 'App',
-  components: {
-    FlowChart,
+  components:{
+      FlowChart
   }
 }
 </script>
